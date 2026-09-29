@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { getSupabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 type Joke = {
   id: number;
@@ -17,7 +17,8 @@ export default async function JokesPage() {
   // Fetch fresh rows on every request instead of at build time.
   await connection();
 
-  const { data: jokes, error } = await getSupabase()
+  const supabase = await createClient();
+  const { data: jokes, error } = await supabase
     .from("jokes")
     .select("id, setup, punchline, created_at")
     .order("id");
