@@ -4,7 +4,7 @@ import { supabaseEnv } from "./env";
 
 // Routes that require a signed-in user. Pages also check on the server;
 // this just redirects early so signed-out visitors never see them.
-const PROTECTED_PREFIXES = ["/dashboard", "/profile", "/welcome"];
+const PROTECTED_PREFIXES = ["/dashboard", "/profile", "/welcome", "/create"];
 
 export async function updateSession(request: NextRequest) {
   const { url, anonKey } = supabaseEnv();

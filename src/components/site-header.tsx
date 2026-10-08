@@ -11,15 +11,20 @@ export async function SiteHeader() {
 
   return (
     <header className="border-b border-black/10 bg-white dark:border-white/10 dark:bg-black">
-      <nav className="mx-auto flex max-w-4xl items-center gap-5 px-6 py-3">
+      <nav className="mx-auto flex max-w-4xl items-center gap-5 px-4 py-3 sm:px-6">
         <Link href="/" className="font-semibold text-black dark:text-white">
-          Homework
+          Caption the City
         </Link>
-        <Link href="/jokes" className={linkClass}>
+        {user && (
+          <Link href="/create" className={linkClass}>
+            Post
+          </Link>
+        )}
+        <Link href="/jokes" className={`${linkClass} hidden sm:inline`}>
           Jokes
         </Link>
         {user && (
-          <Link href="/dashboard" className={linkClass}>
+          <Link href="/dashboard" className={`${linkClass} hidden sm:inline`}>
             Members
           </Link>
         )}
