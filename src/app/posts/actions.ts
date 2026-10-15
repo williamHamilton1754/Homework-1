@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { buildPrompt, isStyleKey, themeForToday } from "@/lib/captions";
-import { GEMINI_MODEL, generateCaptions } from "@/lib/gemini";
+import { writeCaptions } from "@/lib/ai";
 import { createClient } from "@/lib/supabase/server";
 
 const POSTS_PER_DAY = 10;
@@ -48,12 +48,13 @@ export async function createPost(
   const prompt = buildPrompt(style, theme);
 
   let captions: string[];
+  let model: string;
   try {
-    captions = await generateCaptions({
+    ({ captions, model } = await writeCaptions({
       prompt,
       image: await file.arrayBuffer(),
       mimeType: file.type || "image/jpeg",
-    });
+    }));
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Caption generation failed." };
   }
@@ -78,7 +79,7 @@ export async function createPost(
       content,
       style,
       prompt,
-      model: GEMINI_MODEL,
+      model,
     })),
   );
   if (captionError) {
