@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
@@ -27,6 +28,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <SiteHeader />
         {children}
+        <footer className="border-t border-black/10 bg-zinc-50 py-6 text-center text-xs text-zinc-500 dark:border-white/10 dark:bg-black">
+          Caption the City · a Columbia class project ·{" "}
+          <Link href="/jokes" className="underline hover:text-black dark:hover:text-white">
+            Jokes
+          </Link>{" "}
+          ·{" "}
+          <Link href="/privacy" className="underline hover:text-black dark:hover:text-white">
+            Privacy
+          </Link>
+        </footer>
       </body>
     </html>
   );

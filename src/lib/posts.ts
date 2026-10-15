@@ -3,9 +3,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export type Caption = {
   id: number;
   content: string;
-  style: string;
-  prompt: string;
-  model: string;
+  source: "ai" | "human";
+  created_by: string;
+  style: string | null;
+  prompt: string | null;
+  model: string | null;
   upvotes: number;
   downvotes: number;
 };
@@ -22,10 +24,17 @@ export type Post = {
 export type Sort = "hot" | "new" | "top";
 
 const POST_COLUMNS =
-  "id, user_id, image_url, theme, created_at, captions(id, content, style, prompt, model, upvotes, downvotes)";
+  "id, user_id, image_url, theme, created_at, captions(id, content, source, created_by, style, prompt, model, upvotes, downvotes)";
 
-const score = (c: Caption) => c.upvotes - c.downvotes;
+export const score = (c: Pick<Caption, "upvotes" | "downvotes">) => c.upvotes - c.downvotes;
 const bestScore = (p: Post) => Math.max(0, ...p.captions.map(score));
+
+// The caption currently winning a post, if any caption is clearly ahead.
+export function leaderId(post: Post) {
+  const [first, second] = post.captions;
+  if (!first || score(first) <= 0) return null;
+  return !second || score(first) > score(second) ? first.id : null;
+}
 
 function sortCaptions(post: Post): Post {
   return { ...post, captions: [...post.captions].sort((a, b) => score(b) - score(a) || a.id - b.id) };

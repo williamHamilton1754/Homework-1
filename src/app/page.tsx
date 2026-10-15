@@ -10,6 +10,12 @@ const SORTS: { key: Sort; label: string }[] = [
   { key: "top", label: "Top" },
 ];
 
+const HOW_IT_WORKS = [
+  { icon: "📸", title: "Snap the city", text: "Post a photo from around New York, ideally on today's theme." },
+  { icon: "✨", title: "AI writes captions", text: "Pick a voice and AI writes three captions for your photo." },
+  { icon: "🗳️", title: "Vote or compete", text: "Upvote the funniest, or write your own to beat the AI." },
+];
+
 const primaryButton =
   "rounded-full bg-foreground px-5 py-2.5 font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]";
 
@@ -18,7 +24,13 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const sort: Sort = SORTS.some((s) => s.key === sortParam) ? (sortParam as Sort) : "hot";
 
   const { supabase, user, profile } = await getSession();
-  const { posts, error } = await getFeed(supabase, sort);
+  let { posts, error } = await getFeed(supabase, sort);
+
+  // Nothing posted in the last day: show the latest posts instead of an empty page.
+  const showingRecent = sort === "hot" && !error && posts.length === 0;
+  if (showingRecent) {
+    ({ posts, error } = await getFeed(supabase, "new"));
+  }
   const myVotes = await getMyVotes(supabase, user?.id, posts);
   const theme = themeForToday();
 
@@ -50,6 +62,23 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           </div>
         </section>
 
+        {!user && (
+          <ol className="mt-6 grid gap-3 sm:grid-cols-3">
+            {HOW_IT_WORKS.map((step, i) => (
+              <li
+                key={step.title}
+                className="rounded-xl border border-black/10 bg-white p-4 dark:border-white/15 dark:bg-zinc-900"
+              >
+                <p className="text-2xl">{step.icon}</p>
+                <p className="mt-2 font-medium text-black dark:text-white">
+                  {i + 1}. {step.title}
+                </p>
+                <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{step.text}</p>
+              </li>
+            ))}
+          </ol>
+        )}
+
         <nav className="mt-8 flex gap-2">
           {SORTS.map((s) => (
             <Link
@@ -68,9 +97,19 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
         <div className="mt-6 flex flex-col gap-6">
           {error && <p className="text-red-600 dark:text-red-400">Could not load posts: {error.message}</p>}
+          {showingRecent && posts.length > 0 && (
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              Nothing new in the last 24 hours, so here are the latest posts.{" "}
+              {user && (
+                <Link href="/create" className="font-medium text-black underline dark:text-white">
+                  Post today&apos;s first photo
+                </Link>
+              )}
+            </p>
+          )}
           {!error && posts.length === 0 && (
             <p className="rounded-xl border border-dashed border-black/15 p-8 text-center text-zinc-600 dark:border-white/20 dark:text-zinc-400">
-              {sort === "hot" ? "Nothing posted in the last 24 hours. " : "No posts yet. "}
+              No posts yet. 
               {user ? (
                 <Link href="/create" className="underline">
                   Be the first!

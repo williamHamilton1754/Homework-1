@@ -77,6 +77,7 @@ export async function createPost(
       post_id: post.id,
       created_by: user.id,
       content,
+      source: "ai",
       style,
       prompt,
       model,
@@ -147,4 +148,36 @@ export async function castVote(captionId: number, value: 1 | -1): Promise<VoteRe
     upvotes: caption?.upvotes ?? 0,
     downvotes: caption?.downvotes ?? 0,
   };
+}
+
+// A signed-in user's own caption, competing with the AI's on the same post.
+export async function addCaption(postId: number, text: string): Promise<{ error: string } | { ok: true }> {
+  const content = text.trim().replace(/\s+/g, " ");
+  if (content.length === 0) {
+    return { error: "Write a caption first." };
+  }
+  if (content.length > 140) {
+    return { error: "Keep it under 140 characters." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "Sign in to add a caption." };
+  }
+
+  const { error } = await supabase
+    .from("captions")
+    .insert({ post_id: postId, created_by: user.id, content, source: "human" });
+  if (error) {
+    return {
+      error: error.code === "23505" ? "You've already added a caption to this post." : error.message,
+    };
+  }
+
+  revalidatePath("/");
+  revalidatePath(`/posts/${postId}`);
+  return { ok: true };
 }

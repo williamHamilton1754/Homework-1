@@ -1,10 +1,24 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/post-card";
 import { getSession } from "@/lib/auth";
 import { getMyVotes, getPost } from "@/lib/posts";
+import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "Post" };
+// Rich link previews when a post is shared (iMessage, Slack, GroupMe, …).
+export async function generateMetadata({ params }: PageProps<"/posts/[id]">): Promise<Metadata> {
+  const post = await getPost(await createClient(), Number((await params).id));
+  if (!post) {
+    return { title: "Post not found" };
+  }
+  const caption = post.captions[0]?.content ?? "A photo from around New York";
+  return {
+    title: caption,
+    description: "Vote on the funniest caption on Caption the City.",
+    openGraph: { title: caption, images: [post.image_url] },
+  };
+}
 
 export default async function PostPage({ params }: PageProps<"/posts/[id]">) {
   const { id } = await params;

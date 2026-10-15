@@ -36,7 +36,7 @@ export function VoteButtons({
       <Link
         href="/login"
         title="Sign in to vote"
-        className="flex min-w-14 flex-col items-center rounded-lg px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+        className="flex w-16 shrink-0 flex-col items-center rounded-lg px-1 py-1 text-center text-xs leading-tight text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
       >
         <span className="text-base font-semibold text-black dark:text-white">{score}</span>
         sign in to vote
@@ -66,7 +66,7 @@ export function VoteButtons({
       aria-pressed={active}
       disabled={pending}
       onClick={() => vote(value)}
-      className={`rounded-md px-2 text-lg leading-none transition-colors disabled:opacity-60 ${
+      className={`flex h-9 w-9 items-center justify-center rounded-lg text-xl leading-none transition-colors hover:bg-zinc-100 disabled:opacity-60 dark:hover:bg-zinc-800 ${
         active
           ? value === 1
             ? "text-orange-600 dark:text-orange-400"
@@ -79,9 +79,9 @@ export function VoteButtons({
   );
 
   return (
-    <div className="flex min-w-14 flex-col items-center" title={error ?? undefined}>
+    <div className="flex w-12 shrink-0 flex-col items-center" title={error ?? undefined}>
       {arrow(1, counts.vote === 1, "Upvote")}
-      <span className="text-sm font-semibold tabular-nums text-black dark:text-white">{score}</span>
+      <span className="text-base font-semibold tabular-nums text-black dark:text-white">{score}</span>
       {arrow(-1, counts.vote === -1, "Downvote")}
       {error && <span className="mt-1 text-center text-xs text-red-600 dark:text-red-400">{error}</span>}
     </div>

@@ -11,7 +11,7 @@ export async function SiteHeader() {
 
   return (
     <header className="border-b border-black/10 bg-white dark:border-white/10 dark:bg-black">
-      <nav className="mx-auto flex max-w-4xl items-center gap-5 px-4 py-3 sm:px-6">
+      <nav className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-3 sm:gap-5 sm:px-6">
         <Link href="/" className="font-semibold text-black dark:text-white">
           Caption the City
         </Link>
@@ -20,12 +20,9 @@ export async function SiteHeader() {
             Post
           </Link>
         )}
-        <Link href="/jokes" className={`${linkClass} hidden sm:inline`}>
-          Jokes
-        </Link>
         {user && (
-          <Link href="/dashboard" className={`${linkClass} hidden sm:inline`}>
-            Members
+          <Link href="/dashboard" className={linkClass}>
+            My stats
           </Link>
         )}
 
@@ -34,7 +31,7 @@ export async function SiteHeader() {
             <>
               <Link href="/profile" className="flex items-center gap-2">
                 <Avatar url={profile?.avatar_url} name={displayName} size={28} />
-                <span className={linkClass}>Profile</span>
+                <span className={`${linkClass} hidden sm:inline`}>Profile</span>
               </Link>
               <form action={signOut}>
                 <button type="submit" className={linkClass}>
