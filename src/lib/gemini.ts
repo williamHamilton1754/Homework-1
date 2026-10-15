@@ -4,8 +4,25 @@ export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-flash-latest";
 
 type GeminiResponse = {
   candidates?: { content?: { parts?: { text?: string }[] } }[];
-  error?: { message?: string };
+  error?: { message?: string; status?: string };
 };
+
+// Turns Gemini's error into something a user can act on. The raw error is
+// logged so it shows up in Vercel's runtime logs.
+function friendlyError(status: number, body: GeminiResponse) {
+  console.error("Gemini request failed", status, body.error);
+
+  if (status === 429) {
+    return "Lots of people are captioning right now. Please try again in a minute.";
+  }
+  if (status === 403 || status === 401 || body.error?.status === "PERMISSION_DENIED") {
+    return "The caption AI is temporarily unavailable. Please try again later.";
+  }
+  if (status === 400) {
+    return "The AI couldn't read that photo. Try a different one.";
+  }
+  return "The caption AI is having trouble right now. Please try again.";
+}
 
 export async function generateCaptions({
   prompt,
@@ -44,9 +61,9 @@ export async function generateCaptions({
     },
   );
 
-  const body = (await response.json()) as GeminiResponse;
+  const body = (await response.json().catch(() => ({}))) as GeminiResponse;
   if (!response.ok) {
-    throw new Error(body.error?.message ?? `Gemini request failed (${response.status}).`);
+    throw new Error(friendlyError(response.status, body));
   }
 
   const text = body.candidates?.[0]?.content?.parts?.[0]?.text ?? "[]";
