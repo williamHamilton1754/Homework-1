@@ -90,7 +90,7 @@ export default async function StatsPage() {
 
       {best && (
         <div className={`mt-4 ${card}`}>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">Your best caption ({score(best)} points)</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">Your best caption ({score(best)} {Math.abs(score(best)) === 1 ? "point" : "points"})</p>
           <p className="mt-1 text-black dark:text-white">“{best.content}”</p>
         </div>
       )}
